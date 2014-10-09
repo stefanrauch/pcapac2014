@@ -1,0 +1,155 @@
+\documentclass[a4paper,
+               %boxit,
+               %titlepage,   % separate title page
+               %refpage      % separate references
+              ]{jacow}
+
+\makeatletter%                           % test for XeTeX where the sequence is by default eps-> pdf, jpg, png, pdf, ...
+\ifboolexpr{bool{xetex}}                 % and the JACoW template provides JACpic2v3.eps and JACpic2v3.jpg which might generates errors
+ {\renewcommand{\Gin@extensions}{.pdf,%
+                    .png,.jpg,.bmp,.pict,.tif,.psd,.mac,.sga,.tga,.gif,%
+                    .eps,.ps,%
+                    }}{}
+\makeatother
+
+\ifboolexpr{bool{xetex} or bool{luatex}} % test for XeTeX/LuaTeX
+ {}                                      % input encoding is utf8 by default
+ {\usepackage[utf8]{inputenc}}           % switch to utf8
+
+\usepackage[USenglish]{babel}
+
+
+\ifboolexpr{bool{jacowbiblatex}}%        % if BibLaTeX is used
+ {%
+  \addbibresource{jacow-test.bib}
+  \addbibresource{biblatex-examples.bib}
+ }{}
+
+\newcommand\SEC[1]{\textbf{\uppercase{#1}}}
+
+%%
+%%   Lengths for the spaces in the title
+%%   \setlength\titleblockstartskip{..}  %before title, default 3pt
+%%   \setlength\titleblockmiddleskip{..} %between title + author, default 1em
+%%   \setlength\titleblockendskip{..}    %afterauthor, default 1em
+
+%\copyrightspace %default 1cm. arbitrary size with e.g. \copyrightspace[2cm]
+
+% testing to fill the copyright space
+%\usepackage{eso-pic}
+%\AddToShipoutPictureFG*{\AtTextLowerLeft{\textcolor{red}{COPYRIGHTSPACE}}}
+
+\begin{document}
+
+\title{Managing Multiple Function Generators for FAIR}
+
+\author{S. Rauch, M. Thieme, Ralph C. Bär, GSI,  Darmstadt, Germany}
+
+\maketitle
+
+%
+\begin{abstract}
+In the FAIR control system, equipment which needs to be controlled with ramped nominal values (e.g. power converters) is controlled by a standard front-end control unit (SCU). An SCU combines a ComExpressBoard with Intel CPU and an FPGA baseboard and acts as bus-master on the SCU host-bus. Up to 12 function generators can be implemented in slave-board FPGAs and can be controlled from one SCU.
+
+The real-time data supply for the generators demands a special software/hardware approach. Direct control of the generators with a FESA (front-end control software) class, running on an Intel Atom CPU with Linux, does not meet the timing requirements. So an extra layer with an LM32 soft-core CPU is added to the FPGA. Communication between Linux and the LM32 is done via shared memory and a ring buffer data structure. The LM32 supplies the function generators with new parameter sets when it is triggered by interrupts. This two-step approach decouples the Linux CPU from the hard real-time requirements. For synchronous start and coherent clocking of all function generators, special pins on the SCU backplane are being used to avoid bus latencies.\end{abstract}
+
+
+\begin{figure}[!htb]
+   \centering
+   \includegraphics*[width=65mm]{JACpic_mc}
+   \caption{Layout of papers.}
+   \label{l2ea4-f1}
+\end{figure}
+
+\subsection{Fonts}
+
+In order to produce good Adobe Acrobat PDF files,
+authors using a \LaTeX\ template are asked to use only Times (in roman [standard],
+bold or italic) and symbols from  the standard set of fonts. In Word use only Symbol
+and, depending on your platform, Times or Times New Roman fonts in standard, bold or
+italic form.
+
+\begin{figure*}[!tbh]
+    \centering
+    \includegraphics*[width=\textwidth]{JACpic2v3}
+
+    \caption{Example of a full-width figure showing the JACoW Team at their annual
+             meeting in 2012. This figure has a multi-line caption that has to
+             be justified rather than centered.}
+    \label{l2ea4-f2}
+\end{figure*}
+
+
+
+
+
+Each figure and table must be numbered in ascending order (1, 2, 3, etc.) throughout
+the paper. Figure captions (\SI{10}{pt} font) are placed below figures, and table captions are placed above tables. Single-line captions are centered in the column, while captions that span more than one line should be justified. The \LaTeX\ template uses the ‘booktabs’ package to
+format tables.
+
+A simple way to introduce figures into a Word document is to place them inside a table that has no borders. This is done in Word as described below.
+
+\textit{Note: If the figure spans both columns, do all steps. If
+the figure is contained in a single column, start at step 5.}
+
+\begin{Enumerate}
+\item	Insert a continuous section break.
+\item	Insert two empty lines (makes later editing easier).
+\item	Insert another continuous section break.
+\item	Click between the two section breaks and Page Layout $\rightarrow$
+        Columns $\rightarrow$ Single.
+\item	Insert $\rightarrow$ Table select a one-column, two-row table.
+\item	Paste the figure in the first row of the table and adjust the size as appropriate.
+\item	Paste/Type the caption in the second row and apply the appropriate figure caption style.
+\item	Table $\rightarrow$ Table properties $\rightarrow$ Borders and
+        Shading $\rightarrow$ None.
+\item	Table $\rightarrow$ Table properties $\rightarrow$ Alignment $\rightarrow$ Center.
+\item	Table $\rightarrow$ Table properties $\rightarrow$ Text wrapping $\rightarrow$ None.
+\item	Remove blank lines from in and around the table.
+\item	If necessary play with the cell spacing and other parameters to improve appearance.
+\end{Enumerate}
+
+\section{styles}
+
+
+
+
+\section{checklist for electronic publication}
+
+\begin{Itemize}
+    \item  Use only Times or Times New Roman (standard, bold or italic) and Symbol
+           fonts for text---\SI{10}{pt} minimum except references, which can be \SI{9}{pt} or \SI{10}{pt}.
+    \item  Figures should use Times or Times New Roman (standard, bold or italic) and
+           Symbol fonts when possible---\SI{6}{pt} minimum.
+    \item  Check that citations to references appear in sequential order and
+           that all references are cited~\cite{exampl-last}.
+    \item  Check that the PDF file prints correctly.
+    \item  Check that there are no page numbers.
+    \item  Check that the margins on the printed version are within \SI{\pm1}{mm}
+           of the specifications.
+    \item  \LaTeX\ users can check their margins by invoking the
+           \texttt{boxit} option.
+\end{Itemize}
+
+
+%
+% this setting when the default (\flushend)
+% => "balance two column" shows bad results
+%
+\iftrue   % balancing with bad results
+	\newpage
+	\raggedend
+\fi
+
+
+\iffalse  % only for "biblatex"
+	\newpage
+	\printbibliography
+
+% "biblatex" is not used, go the "manual" way
+\else
+
+
+\fi
+
+\end{document}
