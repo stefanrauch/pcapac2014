@@ -63,6 +63,12 @@ The FG is configured with a set of data and interpolates then a predefined numbe
 is provided by the linux FESA class. A brief hardware description of the FG can be found here ~\cite{ref_fg_paper}. In contrast to the older paper, a few things had to be changed for the implementation.
 The datapath is now 64Bit wide and both parameters, the linear and the quadratic one, can now be shifted in a 64Bit range. 
 
+\begin{figure}[!htb]
+   \centering
+   \includegraphics*[width=65mm]{data_linux2fg}
+   \caption{Layout of papers.}
+   \label{l2ea4-f1}
+\end{figure}
 
 \section{data supply with real time boundaries}
 The FG can be configured to interpolate in steps from 250 up to 32000. The sample frequency is configurable from 16kHz up to 1Mhz. If the FG should now sample with 1Mhz for 250 steps
