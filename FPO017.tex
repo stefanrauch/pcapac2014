@@ -55,17 +55,17 @@ The real-time data supply for the generators demands a special software/hardware
 
 
 \section{Description of SCU and FG}
-The quadratic function generator(FG) which is described in this paper, is a VDHL macro that runs in SCU bus slave cards. At the moment, there are three slave cards with this feature: DIOB (1 FG), ADDAC1 (2 FGs) and ADDAC2 (2 FGs). The DIOB card has an digital output with 32Bit for the FG output value. The two ADDAC cards offer an analog output with 16Bit resolution for the FGs.
+The quadratic function generator(FG) which is described in this paper, is a VDHL macro that runs in SCU bus slave cards. At the moment, there are three slave cards with this feature: DIOB (1 FG), ADDAC1 (2 FGs) and ADDAC2 (2 FGs). The DIOB card has an digital output with 32 Bit for the FG output value. The two ADDAC cards offer an analog output with 16Bit resolution for the FGs.
 The slave cards are
 controlled via the SCU bus from the Scalable Control Unit(SCU). The SCU is a FPGA based controller equipped with a ComExpress Board which runs linux. The communication between FPGA and ComExpress Board is done via PCIe. Inside the FPGA is a System-on-Chip(SoC) on basis of a wishbone\cite{ref_wishbone} crossbar with a PCIe-to-wishbone bridge (wishbone master). The SCU bus is connected with a bridge too, that acts as a wishbone slave. Part of the SoC is LM32 cluster with a configurable number of softcore processors and shared memory. A separate crossbar is used for message signaled interrupts(MSI). A interrupt master, e.g. SCU bus bridge, sends MSIs to an interrupt slave. That can be a interrupt queue of an LM32 or the PCIe bridge. With the use of MSIs, the interrupt system is quiet flexible, because every slave can address every interrupt target.\\
-The SCU bus is a parallel bus with 12 slave slots. The data and address lines are each 16Bit wide. Each slave has a separate IRQ line. Inside the SCU bus bridge the IRQs are translated into MSIs.
-The system should be used as an arbitrary function generator with 12 independent channels. Each channel will control equipment that needs ramped nominal values. That means for example  power converters and DDS systems.
+The SCU bus is a parallel bus with 12 slave slots. The data and address lines are each 16 Bit wide. Each slave has a separate IRQ line. Inside the SCU bus bridge the IRQs are translated into MSIs.
+The system should be used as an arbitrary function generator with 12 independent channels. Each channel will control equipment that needs ramped nominal values. That means for example  power converters and Direct Digital Synthesis(DDS) systems.
 The FG is configured with a set of data and interpolates then a predefined number of output values. After the interpolation is started, the FG waits for the next set of data that
 is provided by the linux FESA class. A brief hardware description of the FG can be found here ~\cite{ref_fg_paper}. In contrast to the older paper, a few things had to be changed for the implementation.
-The data path is now 64Bit wide and both parameters, the linear and the quadratic one, can now be shifted in a 64Bit range.
+The data path is now 64 Bit wide and both parameters, the linear and the quadratic one, can now be shifted in a 64Bit range.
 
 \subsection{FG inside SCU}
-Other then for ramped power converters, the SCU will be used to control DDS systems. This will be done with FIB cards, which are supplied from the radio frequency group. These FIB cards are used as SCU slaves. But in there current revision the are not able to run a FG macro in the slaves. So a different solution had to be found. The same FG macro as used in the slaves is put behind a wishbone interface and connected to the crossbar of the SCU. The output of that FG is connected to a special wishbone master, that splits the 32Bit output value from the FG into two 16Bit accesses to the SCU bus. So the interpolation of the FG is done inside the SCU, instead of inside the SCU slaves. Because this modus uses a lot more bandwidth than the slave approach, the SCU bus should only be used for sending FG values. The FG macro with wishbone interface acts exactly like the FG in the slaves, only the interface is different. For the software layer the look
+Other then for ramped power converters, the SCU will be used to control DDS systems. This will be done with FIB cards, which are supplied from the radio frequency group. These FIB\cite{ref_fib} cards are used as SCU slaves. But in there current revision the are not able to run a FG macro in the slaves. So a different solution had to be found. The same FG macro as used in the slaves is put behind a wishbone interface and connected to the crossbar of the SCU. The output of that FG is connected to a special wishbone master, that splits the 32 Bit output value from the FG into two 16Bit accesses to the SCU bus. So the interpolation of the FG is done inside the SCU, instead of inside the SCU slaves. Because this modus uses a lot more bandwidth than the slave approach, the SCU bus should only be used for sending FG values. The FG macro with wishbone interface acts exactly like the FG in the slaves, only the interface is different. For the software layer the look
 identical.
 
 \begin{figure}[!htb]
@@ -76,13 +76,13 @@ identical.
 \end{figure}
 
 \section{data supply with real time boundaries}
-The FG can be configured to interpolate in steps from 250 up to 32000. The sample frequency is configurable from 16kHz up to 1Mhz. If the FG should now sample with 1Mhz for 250 steps
-that means the linux program has to provide a new data set every 250µs. This data rate is to high for linux to be serviced reliably for 12 channels.
+The FG can be configured to interpolate in steps from 250 up to 32000. The sample frequency is configurable from 16 kHz up to 1 Mhz. If the FG should now sample with 1 Mhz for 250 steps
+that means the linux program has to provide a new data set every 250 µs. This data rate is to high for linux to be serviced reliably for 12 channels.
 
 \section{implementation with LM32 and MSI}
 As direct control of the FG macro from linux is not possible, another real time layer is inserted. 
 One of these LM32s is now used for configuring the FGs and supplying new data when triggered by the FG.
-Because each of the LM32 softcores has a dual port memory, that is accessible for the other LM32s and the linux system via the PCIe bridge, communication is done via circular buffers in shared memory. The software running on the LM32 is written in C and needs no operating system. So the real time behavior is easy to predict. The real time processing is done in a IRQ handler, that supplies the FGs with data. The round trip time for each interrupt from the source (FG macro) to the IRQ handler and then back again is around 5µs. One SCU bus access is 300ns long. With six SCU bus accesses needed for every parameter set, that makes 18µs for the handling of each FG. With a step width of 250 theoretically 13 FGs could be serviced. In reality the smallest step width used, will be 1000. That gives enough time for handling the 12 FGs needed.\\
+Because each of the LM32 softcores has a dual port memory, that is accessible for the other LM32s and the linux system via the PCIe bridge, communication is done via circular buffers in shared memory. The software running on the LM32 is written in C and needs no operating system. So the real time behavior is easy to predict. The real time processing is done in a IRQ handler, that supplies the FGs with data. The round trip time for each interrupt from the source (FG macro) to the IRQ handler and then back again is around 5 µs. One SCU bus access is 300 ns long. With six SCU bus accesses needed for every parameter set, that makes 18 µs for the handling of each FG. With a step width of 250 theoretically 13 FGs could be serviced. In reality the smallest step width used, will be 1000. That gives enough time for handling the 12 FGs needed.\\
 For controlling the LM32 software, another IRQ handler is used. Here the linux software generates MSIs by writing to LM32 interrupt queues. This works as a software interrupt scheme.
 
 \section{FG operation}
@@ -96,7 +96,8 @@ The software sends the first parameter set with the start value to each FG. Afte
 %ringbuffers
 %graphic with config and irq driven data supply
 \section{Project status and future work}
-The hardware implementation of the FG macro in both modes (SCU slave/Wishbone slave) is done. A test program exist under linux, that is able to start the FGs with arbitrary ramp data supplied by a text file. The integration into FESA is in progress.
+The hardware implementation of the FG macro in both modes (SCU slave/Wishbone slave) is done. A test program exist under linux, that is able to start the FGs with arbitrary ramp data supplied by a text file. The integration into FESA is in progress.\\
+A Data Aquisition(DAQ) system for the slaves is planned, that can make use of the same infrastructure as the FG. Only the direction of the data flow would be the other way around.\\ 
 At the moment the data transfer between linux and the LM32 runs in polling mode. The linux program constantly tries to fill the circular buffer. This wastes lots of bandwidth. It would be more effective, if the LM32 signals to the linux program, that the buffer needs to be refilled. That can be done with an interrupt to the PCIe bridge.
 
 
@@ -126,6 +127,10 @@ At the moment the data transfer between linux and the LM32 runs in polling mode.
 
 \bibitem{ref_wishbone}
 	\url{http://cdn.opencores.org/downloads/wbspec_b4.pdf}
+
+\bibitem{ref_fib}
+  M. Kumm et al., ``Realtime Communication Based on Optical Fibers for the Control of Digital RF Components'', 
+  GSI Scientific Report 2007
 
 \end{thebibliography}
 \fi
